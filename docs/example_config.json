@@ -1,0 +1,6 @@
+{
+  "remote_url": "https://example.com",
+  "path": "/mylocal",
+  "local_port": 8080,    
+  "cors": ["https://foo.com"]
+}
