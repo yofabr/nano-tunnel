@@ -11,6 +11,8 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/spf13/cobra"
+	"github.com/yofabr/nano_tunnel/internal/forward"
+	"github.com/yofabr/nano_tunnel/internal/logger"
 	"github.com/yofabr/nano_tunnel/internal/start"
 )
 
@@ -18,6 +20,10 @@ type Message struct {
 	Event    string `json:"event"`
 	ClientID string `json:"clientID,omitempty"`
 	Message  string `json:"message,omitempty"`
+}
+
+func WelcomLogger() {
+
 }
 
 // startCmd represents the start command
@@ -65,9 +71,12 @@ to quickly create a Cobra application.`,
 
 			switch m.Event {
 			case "welcome":
-				log.Println("Connected! ClientID:", m.ClientID)
+				logger.WelcomLogger(m.ClientID)
 			case "broad":
 				log.Println("Broadcast message:", m.Message)
+
+			case "forward":
+				forward.FetchResource("http://localhost:8080/api/hello")
 			default:
 				log.Println("Unknown event:", m.Event)
 			}

@@ -15,7 +15,7 @@ app.get("/send", (req, res) => {
   // Broadcast message to all WebSocket clients
   wss.clients.forEach((client) => {
     if (client.readyState === 1) { // WebSocket.OPEN
-      client.send(JSON.stringify({ event: "broad", message: "This is broadcaster!" }));
+      client.send(JSON.stringify({ event: "forward", message: "This is broadcaster!" }));
     }
   });
   res.json({ message: "From send" });
