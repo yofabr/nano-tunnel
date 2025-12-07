@@ -11,20 +11,36 @@ app.get("/api/hello", (req, res) => {
   res.json({ message: "Hello from Express!" });
 });
 
-app.get("/send", (req, res) => {
-  // Broadcast message to all WebSocket clients
-  wss.clients.forEach((client) => {
-    if (client.readyState === 1) { // WebSocket.OPEN
-      client.send(JSON.stringify({ event: "forward", message: "This is broadcaster!" }));
-    }
-  });
-  res.json({ message: "From send" });
+let clients = {};
+
+app.post("/send", (req, res) => {
+  const { clientID, port } = req.body;
+
+  if (!clientID) {
+    return res.status(400).json({ error: "clientID is required" });
+  }
+
+  const client = clients[clientID]
+
+  if (!client || client.readyState !== 1) {
+    return res.status(404).json({ error: "Client not connected" });
+  }
+
+  // Send a message to this specific client
+  client.send(
+    JSON.stringify({
+      event: "forward",
+      message: `Hello client! Use local port: ${port}`,
+    })
+  );
+
+  res.json({ message: "Message sent to client", clientID });
 });
+
 
 // Create WebSocket server
 const wss = new WebSocketServer({ server, path: "/ws" });
 
-let clients = {};
 
 wss.on("connection", (ws) => {
   const clientID = randomUUID();
