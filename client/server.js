@@ -31,7 +31,9 @@ app.post("/send", (req, res) => {
     JSON.stringify({
       event: "forward",
       message: ``,
-      local_port: port
+      data: {
+        local_port: port
+      }
     })
   );
 
