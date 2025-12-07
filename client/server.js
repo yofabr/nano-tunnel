@@ -24,7 +24,7 @@ const io = new Server(server, {
 
 let clients = {};
 
-io.on("connection", (socket) => {
+io.path("/socket.io").on("connection", (socket) => {
   console.log("New client connected:", socket.id);
 
   let clientID = randomUUID();
