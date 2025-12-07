@@ -73,6 +73,7 @@ to quickly create a Cobra application.`,
 				log.Println("Broadcast message:", m.Message)
 
 			case "forward":
+				fmt.Println(m.Event, m.Message)
 				forward.FetchResource("http://localhost:8080/api/hello")
 			default:
 				log.Println("Unknown event:", m.Event)
