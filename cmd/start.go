@@ -4,12 +4,21 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/url"
 
+	"github.com/gorilla/websocket"
 	"github.com/spf13/cobra"
 	"github.com/yofabr/nano_tunnel/internal/start"
 )
+
+type Message struct {
+	Event    string `json:"event"`
+	ClientID string `json:"clientID,omitempty"`
+	Message  string `json:"message,omitempty"`
+}
 
 // startCmd represents the start command
 var startCmd = &cobra.Command{
@@ -32,8 +41,42 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal("Error while reading:", err)
 		}
+		u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/ws"}
+		log.Println("Connecting to", u.String())
 
+		c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+		if err != nil {
+			log.Fatal("Dial error:", err)
+		}
+		defer c.Close()
+
+		for {
+			_, msg, err := c.ReadMessage()
+			if err != nil {
+				log.Println("Read error:", err)
+				break
+			}
+
+			var m Message
+			if err := json.Unmarshal(msg, &m); err != nil {
+				log.Println("JSON unmarshal error:", err)
+				continue
+			}
+
+			switch m.Event {
+			case "welcome":
+				log.Println("Connected! ClientID:", m.ClientID)
+			case "broad":
+				log.Println("Broadcast message:", m.Message)
+			default:
+				log.Println("Unknown event:", m.Event)
+			}
+		}
 		fmt.Println("Listener", *listener)
+
+		// for {
+		// 	time.Sleep(1 * time.Second)
+		// }
 	},
 }
 
