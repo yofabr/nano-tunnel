@@ -13,10 +13,15 @@ import (
 	"github.com/yofabr/nano_tunnel/internal/start"
 )
 
+type WsData struct {
+	LocalPort string `json:"local_port,omitempty"`
+}
+
 type Message struct {
 	Event    string `json:"event"`
 	ClientID string `json:"clientID,omitempty"`
 	Message  string `json:"message,omitempty"`
+	Data     WsData `json:"data,omitempty"`
 }
 
 func WelcomLogger() {
@@ -73,8 +78,9 @@ to quickly create a Cobra application.`,
 				log.Println("Broadcast message:", m.Message)
 
 			case "forward":
-				fmt.Println(m.Event, m.Message)
-				forward.FetchResource("http://localhost:8080/api/hello")
+				fmt.Println(m.Event, m)
+				url := fmt.Sprintf("http://localhost:%s/api/hello", m.Data.LocalPort)
+				forward.FetchResource(url)
 			default:
 				log.Println("Unknown event:", m.Event)
 			}
