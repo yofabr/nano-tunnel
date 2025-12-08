@@ -1,4 +1,4 @@
-module github.com/yofabr/nano_tunnel
+module github.com/yofabr/nano-tunnel
 
 go 1.25.4
 
