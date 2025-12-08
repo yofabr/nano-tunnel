@@ -8,9 +8,9 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/spf13/cobra"
-	"github.com/yofabr/nano_tunnel/internal/forward"
-	"github.com/yofabr/nano_tunnel/internal/logger"
-	"github.com/yofabr/nano_tunnel/internal/start"
+	"github.com/yofabr/nano-tunnel/internal/forward"
+	"github.com/yofabr/nano-tunnel/internal/logger"
+	"github.com/yofabr/nano-tunnel/internal/start"
 )
 
 type WsData struct {
@@ -50,7 +50,7 @@ to quickly create a Cobra application.`,
 			log.Fatal("Error while reading:", err)
 		}
 		u := url.URL{Scheme: "wss", Host: listener.RemoteUrl, Path: "/ws"}
-		log.Println("Connecting to", u.String())
+		fmt.Println("Connecting to", u.String())
 
 		c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 		if err != nil {

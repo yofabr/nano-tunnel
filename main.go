@@ -1,10 +1,9 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package main
 
-import "github.com/yofabr/nano_tunnel/cmd"
+import "github.com/yofabr/nano-tunnel/cmd"
 
 func main() {
 	cmd.Execute()
