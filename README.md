@@ -2,7 +2,10 @@
 
 **Nano-tunnel** is a simple CLI tool that forwards requests to your local ports from the internet, allowing you to access your local development environments remotely.
 
+
+![Alt text](./screenshots/screenshot1.png)
 ---
+
 
 ## Installation
 
@@ -39,7 +42,7 @@ nano-tunnel start ./your_config_file.json
 3. Copy your **Client ID** from the terminal and use it on the hosted Nano-tunnel client website to forward requests to your device.
 
 ---
-## Uninstallation
-```bash
-sudo rm /usr/local/bin/nano-tunnel
-```
+
+## License
+
+MIT License
