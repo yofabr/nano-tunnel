@@ -5,7 +5,14 @@ import { randomUUID } from "crypto";
 
 const app = express();
 const server = http.createServer(app);
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from the "public" directory
+app.use(express.static("public"));
+app.set("view engine", "ejs");
+app.set('views', './views');
 
 app.get("/api/hello", (req, res) => {
   res.json({ message: "Hello from Express!" });
@@ -13,8 +20,14 @@ app.get("/api/hello", (req, res) => {
 
 let clients = {};
 
+app.get("/dashboard", (req, res) => {
+  res.render("dashboard", { clients: Object.keys(clients) });
+});
+
 app.post("/send", (req, res) => {
-  const { clientID, port } = req.body;
+  console.log("Sending...", req.body);
+  
+  const { clientID, port, method, headers, body } = req.body;
 
   if (!clientID) {
     return res.status(400).json({ error: "clientID is required" });
@@ -32,7 +45,10 @@ app.post("/send", (req, res) => {
       event: "forward",
       message: ``,
       data: {
-        local_port: port
+        local_port: port,
+        method, 
+        headers,
+        body
       }
     })
   );

@@ -1,0 +1,5 @@
+{
+  "watch": ["*.js", "*.bun", "*.json", "./views/*.ejs"],
+  "ext": "bun",
+  "exec": "bun server.js"
+}

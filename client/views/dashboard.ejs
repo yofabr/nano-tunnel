@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nano-tunnel</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        background: #f8fafc;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .left-panel {
+        width: 35%;
+        background: white;
+        border-right: 1px solid #e2e8f0;
+        padding: 28px;
+        overflow-y: auto;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+        font-size: 20px;
+        font-weight: 600;
+        color: #3b82f6;
+      }
+
+      .response-header-text {
+        color: #cbd5e1;
+      }
+
+      .logo-icon {
+        background: #3b82f6;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      h2 {
+        font-size: 18px;
+        color: #1e293b;
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        color: #475569;
+        font-size: 14px;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+        background: white;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      }
+
+      .row {
+        display: flex;
+        gap: 12px;
+      }
+
+      .row .half {
+        flex: 1;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      button {
+        padding: 12px 20px;
+        font-size: 14px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      .primary-btn {
+        background: #3b82f6;
+        color: white;
+      }
+
+      .primary-btn:hover {
+        background: #2563eb;
+      }
+
+      .secondary-btn {
+        background: #f1f5f9;
+        color: #475569;
+      }
+
+      .secondary-btn:hover {
+        background: #e2e8f0;
+      }
+
+      #headersContainer {
+        margin-bottom: 10px;
+      }
+
+      .header-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .header-row input {
+        padding: 10px;
+      }
+
+      .remove-header {
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0 10px;
+        cursor: pointer;
+      }
+
+      .remove-header:hover {
+        background: #dc2626;
+      }
+
+      #addHeaderBtn {
+        margin-bottom: 20px;
+        background: #e2e8f0;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        border: none;
+      }
+
+      #addHeaderBtn:hover {
+        background: #cbd5e1;
+      }
+
+      .right-panel {
+        width: 65%;
+        background: #1e293b;
+        color: white;
+        padding: 28px;
+        overflow-y: auto;
+      }
+
+      .response-content {
+        background: #0f172a;
+        padding: 18px;
+        border-radius: 6px;
+        height: calc(100vh - 120px);
+        overflow-y: auto;
+      }
+
+      pre {
+        color: #cbd5e1;
+        font-family: Consolas, monospace;
+        font-size: 13px;
+        white-space: pre-wrap;
+      }
+
+      .error {
+        color: #dc2626;
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="left-panel">
+      <div class="logo">
+        <div class="logo-icon">NT</div>
+        nano-tunnel
+      </div>
+
+      <h2>Config</h2>
+
+      <label>Client ID</label>
+      <input type="text" id="clientId" placeholder="client-123" />
+      <div id="clientIdError" class="error"></div>
+
+      <div class="row" style="margin-top: 18px">
+        <div class="half">
+          <label>Port</label>
+          <input type="number" id="port" placeholder="8080" />
+          <div id="portError" class="error"></div>
+        </div>
+
+        <div class="half">
+          <label>Method</label>
+          <select id="method">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+            <option>DELETE</option>
+          </select>
+        </div>
+      </div>
+
+      <h3
+        style="
+          margin-top: 22px;
+          margin-bottom: 10px;
+          color: #1e293b;
+          font-size: 16px;
+        "
+      >
+        Headers
+      </h3>
+
+      <div id="headersContainer"></div>
+      <button id="addHeaderBtn">+ Add Header</button>
+
+      <label>Payload (JSON)</label>
+      <textarea id="payload" rows="5" placeholder='{"msg":"Hello"}'></textarea>
+      <div id="payloadError" class="error"></div>
+
+      <div class="buttons">
+        <button class="primary-btn" id="startBtn">Start Tunnel</button>
+        <button class="secondary-btn" id="clearBtn">Clear</button>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <h2 class="response-header-text">Response</h2>
+
+      <div class="response-content">
+        <pre id="jsonResponse">
+{
+  "message": "Send a request to your local connected client"
+}</pre
+        >
+      </div>
+    </div>
+
+    <script>
+      const responseBox = document.getElementById("jsonResponse");
+
+      // --- Add Header ---
+      document.getElementById("addHeaderBtn").onclick = () => {
+        const row = document.createElement("div");
+        row.className = "header-row";
+
+        row.innerHTML = `
+            <input class="header-key" placeholder="Key" />
+            <input class="header-value" placeholder="Value" />
+            <button class="remove-header">✕</button>
+        `;
+
+        row.querySelector(".remove-header").onclick = () => row.remove();
+        document.getElementById("headersContainer").appendChild(row);
+      };
+
+      // --- Clear ---
+      document.getElementById("clearBtn").onclick = () => {
+        document.getElementById("clientId").value = "";
+        document.getElementById("port").value = "";
+        document.getElementById("payload").value = "";
+        document.getElementById("headersContainer").innerHTML = "";
+        responseBox.textContent = JSON.stringify(
+          { message: "Cleared" },
+          null,
+          2
+        );
+      };
+
+      // --- Validate ---
+      function validateForm() {
+        let valid = true;
+
+        document.getElementById("clientIdError").textContent = "";
+        document.getElementById("portError").textContent = "";
+        document.getElementById("payloadError").textContent = "";
+
+        const clientId = document.getElementById("clientId").value.trim();
+        const port = document.getElementById("port").value.trim();
+        const payload = document.getElementById("payload").value.trim();
+
+        if (!clientId) {
+          document.getElementById("clientIdError").textContent =
+            "Client ID is required.";
+          valid = false;
+        }
+        if (!port) {
+          document.getElementById("portError").textContent =
+            "Port is required.";
+          valid = false;
+        }
+        if (payload) {
+          try {
+            JSON.parse(payload);
+          } catch {
+            document.getElementById("payloadError").textContent =
+              "Payload must be valid JSON.";
+            valid = false;
+          }
+        }
+
+        return valid;
+      }
+
+      // --- Start Tunnel (POST /send) ---
+      document.getElementById("startBtn").onclick = async () => {
+        if (!validateForm()) return;
+
+        const clientID = document.getElementById("clientId").value.trim();
+        const port = document.getElementById("port").value.trim();
+        const method = document.getElementById("method").value;
+
+        // headers go inside body
+        const headers = {};
+        document.querySelectorAll(".header-row").forEach((row) => {
+          const key = row.querySelector(".header-key").value.trim();
+          const value = row.querySelector(".header-value").value.trim();
+          if (key) headers[key] = value;
+        });
+
+        // body (user JSON)
+        let bodyJson = {};
+        const rawPayload = document.getElementById("payload").value.trim();
+        if (rawPayload) bodyJson = JSON.parse(rawPayload);
+
+        const requestBody = {
+          clientID,
+          port,
+          method,
+          headers,
+          body: bodyJson,
+        };
+
+        try {
+          responseBox.textContent = "Sending request...";
+
+          const res = await fetch("/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody),
+          });
+
+          const data = await res.json();
+          responseBox.textContent = JSON.stringify(data, null, 2);
+        } catch (err) {
+          responseBox.textContent = JSON.stringify(
+            {
+              error: true,
+              message: "Request Failed",
+              details: err.message,
+            },
+            null,
+            2
+          );
+        }
+      };
+    </script>
+  </body>
+</html>
