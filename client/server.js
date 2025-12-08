@@ -27,7 +27,7 @@ app.get("/", (req, res) => {
 app.post("/send", (req, res) => {
   console.log("Sending...", req.body);
   
-  const { clientID, port, method, headers, body } = req.body;
+  const { clientID, port, method, headers, body, path } = req.body;
 
   if (!clientID) {
     return res.status(400).json({ error: "clientID is required" });
@@ -48,7 +48,8 @@ app.post("/send", (req, res) => {
         local_port: port,
         method, 
         headers,
-        body
+        body,
+        path
       }
     })
   );
