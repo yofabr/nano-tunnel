@@ -20,8 +20,8 @@ app.get("/api/hello", (req, res) => {
 
 let clients = {};
 
-app.get("/dashboard", (req, res) => {
-  res.render("dashboard", { clients: Object.keys(clients) });
+app.get("/", (req, res) => {
+  res.render("dashboard");
 });
 
 app.post("/send", (req, res) => {
