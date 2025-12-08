@@ -39,7 +39,7 @@ nano-tunnel start ./your_config_file.json
 3. Copy your **Client ID** from the terminal and use it on the hosted Nano-tunnel client website to forward requests to your device.
 
 ---
-
-## License
-
-MIT License
+## Uninstallation
+```bash
+sudo rm /usr/local/bin/nano-tunnel
+```
