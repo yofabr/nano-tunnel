@@ -15,6 +15,14 @@ app.set("view engine", "ejs");
 app.set('views', './views');
 
 app.get("/api/hello", (req, res) => {
+  console.log(req.headers, req.body);
+  
+  res.json({ message: "Hello from Express!" });
+});
+
+app.post("/api/hello", (req, res) => {
+  console.log(req.headers, req.body);
+  
   res.json({ message: "Hello from Express!" });
 });
 
@@ -24,9 +32,8 @@ app.get("/", (req, res) => {
   res.render("dashboard");
 });
 
+
 app.post("/send", (req, res) => {
-  console.log("Sending...", req.body);
-  
   const { clientID, port, method, headers, body, path } = req.body;
 
   if (!clientID) {
