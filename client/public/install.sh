@@ -2,7 +2,7 @@
 set -e
 
 APP_NAME="nano-tunnel"
-BINARY_URL="https://nano-tunnel.onrender.com/nano-tunnel"
+BINARY_URL="https://nano-tunnel.onrender.com/cli/nano-tunnel"
 INSTALL_DIR="/usr/local/bin"
 TMP_FILE="/tmp/${APP_NAME}"
 
