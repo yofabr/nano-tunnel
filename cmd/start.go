@@ -49,7 +49,7 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal("Error while reading:", err)
 		}
-		u := url.URL{Scheme: "ws", Host: listener.RemoteUrl, Path: "/ws"}
+		u := url.URL{Scheme: "wss", Host: listener.RemoteUrl, Path: "/ws"}
 		log.Println("Connecting to", u.String())
 
 		c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
