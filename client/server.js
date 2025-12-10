@@ -23,7 +23,13 @@ app.get("/api/hello", (req, res) => {
 app.post("/api/hello", (req, res) => {
   console.log(req.headers, req.body);
 
-  res.json({ message: "Hello from Express!" });
+  res.json({ message: "Hello from Express!", data: {
+    name: "SOme string",
+    age: 35,
+    pub: [12, 34, 4,5],
+    float: 12.2345,
+    nested: { a: true, b: null }
+  } });
 });
 
 let clients = {};
@@ -72,7 +78,7 @@ app.post("/send", async (req, res) => {
     path
   });
 
-  // console.log(response);
+  console.log(response);
   // Send a message to this specific client
   res.json(response);
 });
