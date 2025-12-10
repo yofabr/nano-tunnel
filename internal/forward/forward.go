@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -19,6 +20,8 @@ type ResponseMessage struct {
 }
 
 func FetchResource(c *websocket.Conn, url, method string, headers map[string]string, body map[string]interface{}) {
+	start := time.Now() // ⏱ start timer
+
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
 		log.Fatal("Error marshalling body:", err)
@@ -44,6 +47,8 @@ func FetchResource(c *websocket.Conn, url, method string, headers map[string]str
 	}
 	defer resp.Body.Close()
 
+	duration := time.Since(start) // ⏱ stop timer
+
 	respData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
@@ -57,11 +62,14 @@ func FetchResource(c *websocket.Conn, url, method string, headers map[string]str
 			"status_code": resp.StatusCode,
 			"body":        string(respData),
 			"headers":     resp.Header,
+			"time_ms":     duration.Milliseconds(), // add as ms
+			"time_string": duration.String(),       // "123ms"
 		},
 	}
 
 	c.WriteJSON(event)
 
 	fmt.Println("Status:", resp.StatusCode)
+	fmt.Println("Time taken:", duration)
 	fmt.Println("Response:", string(respData))
 }
