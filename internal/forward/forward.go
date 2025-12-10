@@ -3,7 +3,6 @@ package forward
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -77,7 +76,7 @@ func FetchResource(c *websocket.Conn, url, method string, headers map[string]str
 
 	c.WriteJSON(event)
 
-	fmt.Println("Status:", resp.StatusCode)
-	fmt.Println("Time taken:", duration)
-	fmt.Println("Response:", string(respData))
+	// fmt.Println("Status:", resp.StatusCode)
+	// fmt.Println("Time taken:", duration)
+	// fmt.Println("Response:", string(respData))
 }

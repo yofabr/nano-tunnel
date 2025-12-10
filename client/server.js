@@ -23,13 +23,24 @@ app.get("/api/hello", (req, res) => {
 app.post("/api/hello", (req, res) => {
   console.log(req.headers, req.body);
 
-  res.json({ message: "Hello from Express!", data: {
-    name: "SOme string",
-    age: 35,
-    pub: [12, 34, 4,5],
-    float: 12.2345,
-    nested: { a: true, b: null }
-  } });
+  res.json({
+    message: "Hello from Express!", data: {
+      firstName: "Jane",
+      lastName: "Doe",
+      age: 30,
+      email: "jane.doe@example.com",
+      isStudent: false,
+      hobbies: ["reading", "hiking", "cooking"],
+      address: {
+        street: "123 Main St",
+        city: "Anytown",
+        zipCode: "12345"
+      },
+      greet: function () {
+        return "Hello, my name is " + this.firstName + " " + this.lastName + ".";
+      }
+    }
+  });
 });
 
 let clients = {};
@@ -77,8 +88,6 @@ app.post("/send", async (req, res) => {
     body,
     path
   });
-
-  console.log(response);
   // Send a message to this specific client
   res.json(response);
 });
@@ -90,18 +99,18 @@ const wss = new WebSocketServer({ server, path: "/ws" });
 wss.on("connection", (ws) => {
   const clientID = randomUUID();
   clients[clientID] = ws;
-  console.log("New client connected:", clientID);
+  // console.log("New client connected:", clientID);
 
   // Send welcome message
   ws.send(JSON.stringify({ event: "welcome", clientID }));
 
   ws.on("close", () => {
-    console.log("Client disconnected:", clientID);
+    // console.log("Client disconnected:", clientID);
     delete clients[clientID];
   });
 });
 
 const PORT = 8080;
 server.listen(PORT, () => {
-  console.log(`Server running on port :${PORT}`);
+  // console.log(`Server running on port :${PORT}`);
 });
