@@ -72,9 +72,9 @@ app.post("/send", async (req, res) => {
     path
   });
 
-  console.log(response);
+  // console.log(response);
   // Send a message to this specific client
-  res.json({ message: "Message sent to client", clientID });
+  res.json(response);
 });
 
 
