@@ -6,14 +6,14 @@
     <title>nano-tunnel</title>
 
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 
       body {
         margin: 0;
         font-family: "Inter", sans-serif;
         display: flex;
         height: 100vh;
-        background-color: #f1f5f9;
+        background-color: #0a0a0b;
       }
     </style>
 
@@ -21,75 +21,209 @@
   </head>
 
   <body>
-    <div class="left-panel">
+    <div class="left-panel" id="leftPanel">
       <div class="logo">
-        <div class="logo-icon">NT</div>
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
         nano-tunnel
       </div>
 
-      <h2>Configuration</h2>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </div>
+          <h2>Configuration</h2>
+        </div>
 
-      <label>Client ID</label>
-      <input type="text" id="clientId" placeholder="client-123" />
-      <div id="clientIdError" class="error"></div>
-      <div class="row" style="margin-top: 18px">
-        <div class="half">
+        <div class="input-group">
+          <label>Client ID</label>
+          <div class="input-wrapper">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <input type="text" id="clientId" placeholder="client-123" />
+          </div>
+          <div id="clientIdError" class="error"></div>
+        </div>
+
+        <div class="input-group">
           <label>Path</label>
-          <input type="text" id="path" placeholder="/api/v1/example" />
+          <div class="input-wrapper">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <input type="text" id="path" placeholder="/api/v1/example" />
+          </div>
           <div id="pathError" class="error"></div>
         </div>
+
+        <div class="row">
+          <div class="half">
+            <div class="input-group">
+              <label>Port</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                  <line x1="6" y1="6" x2="6.01" y2="6"/>
+                  <line x1="6" y1="18" x2="6.01" y2="18"/>
+                </svg>
+                <input type="number" id="port" placeholder="8080" />
+              </div>
+              <div id="portError" class="error"></div>
+            </div>
+          </div>
+
+          <div class="half">
+            <div class="input-group">
+              <label>Method</label>
+              <select id="method">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+                <option value="PATCH">PATCH</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="row" style="margin-top: 18px">
-        <div class="half">
-          <label>Port</label>
-          <input type="number" id="port" placeholder="8080" />
-          <div id="portError" class="error"></div>
+
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <h2>Headers</h2>
         </div>
 
-        <div class="half">
-          <label>Method</label>
-          <select id="method">
-            <option>GET</option>
-            <option>POST</option>
-            <option>PUT</option>
-            <option>DELETE</option>
-          </select>
-        </div>
+        <div id="headersContainer"></div>
+        <button id="addHeaderBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Header
+        </button>
       </div>
 
-      <h3
-        style="
-          margin-top: 25px;
-          margin-bottom: 10px;
-          color: #1e293b;
-          font-size: 16px;
-        "
-      >
-        Headers
-      </h3>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+          </div>
+          <h2>Payload (JSON)</h2>
+        </div>
 
-      <div id="headersContainer"></div>
-      <button id="addHeaderBtn">+ Add Header</button>
-
-      <label>Payload (JSON)</label>
-      <textarea id="payload" rows="6" placeholder='{"msg":"Hello"}'></textarea>
-      <div id="payloadError" class="error"></div>
+        <textarea id="payload" rows="5" placeholder='{"msg":"Hello"}'></textarea>
+        <div id="payloadError" class="error"></div>
+      </div>
 
       <div class="buttons">
-        <button class="primary-btn" id="startBtn">Start Tunnel</button>
-        <button class="secondary-btn" id="clearBtn">Clear</button>
+        <button class="primary-btn" id="startBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13"/>
+            <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+          </svg>
+          Send Request
+        </button>
+        <button class="secondary-btn" id="clearBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+          </svg>
+          Clear
+        </button>
       </div>
     </div>
 
-    <div class="right-panel">
-      <h2 class="response-header-text">Response</h2>
+    <!-- Added draggable resizer between panels -->
+    <div class="resizer" id="resizer">
+      <div class="resizer-line"></div>
+    </div>
 
-      <div class="response-content">
-        <pre id="jsonResponse">
-{
+    <div class="right-panel" id="rightPanel">
+      <!-- Restructured response card with meta info in header -->
+      <div class="response-card">
+        <div class="response-card-header">
+          <div class="response-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            Response
+          </div>
+          <div id="statusIndicator" class="status-indicator status-idle">
+            <span class="status-dot"></span>
+            <span class="status-text">Ready</span>
+          </div>
+        </div>
+
+        <!-- Meta info row inside response card header area -->
+        <div id="responseMeta" class="response-meta hidden">
+          <div class="meta-item">
+            <span class="meta-label">Status</span>
+            <span id="statusCode" class="meta-value status-code">200</span>
+          </div>
+          <div class="meta-divider"></div>
+          <div class="meta-item">
+            <span class="meta-label">Time</span>
+            <span id="responseTime" class="meta-value">0ms</span>
+          </div>
+          <div class="meta-divider"></div>
+          <div class="meta-item">
+            <span class="meta-label">Size</span>
+            <span id="responseSize" class="meta-value">0 B</span>
+          </div>
+          <div class="meta-divider"></div>
+          <div class="meta-item">
+            <span class="meta-label">Type</span>
+            <span id="contentType" class="meta-value">-</span>
+          </div>
+        </div>
+
+        <!-- Response Headers Collapsible -->
+        <div id="responseHeadersSection" class="response-headers-section hidden">
+          <button id="toggleHeaders" class="toggle-headers-btn">
+            <svg id="headersChevron" class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+            Response Headers
+            <span id="headersCount" class="headers-count">0</span>
+          </button>
+          <div id="responseHeadersList" class="response-headers-list collapsed">
+          </div>
+        </div>
+
+        <div class="response-body">
+          <div class="response-body-header">
+            <span>Body</span>
+            <button id="copyBtn" class="copy-btn" title="Copy to clipboard">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              Copy
+            </button>
+          </div>
+          <pre id="jsonResponse">{
   "message": "Send a request to your connected local client"
-}</pre
-        >
+}</pre>
+        </div>
       </div>
     </div>
     <script src="/script.js"></script>
