@@ -5,7 +5,7 @@
 **Nano-tunnel** is a simple CLI tool that forwards requests to your local ports from the internet, allowing you to access your local development environments remotely.
 
 
-![Alt text](./screenshots/screenshot1.png)
+![Alt text](./screenshots/screenshot3.png)
 
 ![Alt text](./screenshots/screenshot2.png)
 
