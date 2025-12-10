@@ -49,10 +49,11 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal("Error while reading:", err)
 		}
-		u := url.URL{Scheme: "wss", Host: listener.RemoteUrl, Path: "/ws"}
+		u := url.URL{Scheme: "ws", Host: listener.RemoteUrl, Path: "/ws"}
 		fmt.Println("Connecting to", u.String())
 
 		c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+
 		if err != nil {
 			log.Fatal("Dial error:", err)
 		}
@@ -80,7 +81,7 @@ to quickly create a Cobra application.`,
 			case "forward":
 				fmt.Println(m)
 				url := fmt.Sprintf("http://localhost:%s%s", m.Data.LocalPort, m.Data.Path)
-				forward.FetchResource(url, m.Data.Method, m.Data.Headers, m.Data.Body)
+				forward.FetchResource(c, url, m.Data.Method, m.Data.Headers, m.Data.Body)
 
 			default:
 				log.Println("Unknown event:", m.Event)
