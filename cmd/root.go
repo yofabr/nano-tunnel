@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -10,21 +9,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
-
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "nano_tunnel",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Use:   "nano-tunnel",
+	Short: "Forward your local ports to the internet via a lightweight tunnel",
+	Long: `Nano-tunnel is a tiny Go CLI that keeps a persistent WebSocket
+connection to a remote Nano-tunnel server so you can securely forward HTTP
+requests to your local machine from anywhere.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+Typical flow:
+  1) Create a config file with your remote server:
+       { "remote_url": "nano-tunnel.onrender.com" }
+  2) Start the tunnel with your config:
+       nano-tunnel start ./your_config_file.json
+  3) Copy the printed Client ID into the hosted Nano-tunnel UI and forward
+     requests to the local port you specify.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -37,15 +35,4 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.nano_tunnel.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
-

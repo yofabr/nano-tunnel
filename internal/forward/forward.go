@@ -3,9 +3,11 @@ package forward
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -22,17 +24,28 @@ type ResponseMessage struct {
 	TimeMs      int64                  `json:"time_ms,omitempty"`
 }
 
-func FetchResource(c *websocket.Conn, url, method string, headers map[string]string, body map[string]interface{}) {
-	start := time.Now() // ⏱ start timer
+func FetchResource(c *websocket.Conn, clientID, url, method string, headers map[string]string, body map[string]interface{}) {
+	start := time.Now()
+
+	if method == "" {
+		method = http.MethodGet
+	}
+	method = strings.ToUpper(method)
 
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
-		log.Fatal("Error marshalling body:", err)
+		sendError(c, clientID, fmt.Errorf("marshal body: %w", err), start)
+		return
 	}
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(bodyBytes))
 	if err != nil {
-		log.Fatal("Error creating request:", err)
+		sendError(c, clientID, fmt.Errorf("create request: %w", err), start)
+		return
+	}
+
+	if headers == nil {
+		headers = map[string]string{}
 	}
 
 	if headers["Content-Type"] == "" {
@@ -43,40 +56,56 @@ func FetchResource(c *websocket.Conn, url, method string, headers map[string]str
 		req.Header.Set(k, v)
 	}
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: 15 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Error making request:", err)
+		sendError(c, clientID, fmt.Errorf("forward request: %w", err), start)
+		return
 	}
 	defer resp.Body.Close()
 
-	duration := time.Since(start) // ⏱ stop timer
+	duration := time.Since(start)
 
 	respData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		sendError(c, clientID, fmt.Errorf("read response: %w", err), start)
+		return
 	}
 
 	event := ResponseMessage{
 		Event:    "response",
-		ClientID: "abc123",
+		ClientID: clientID,
 		Message:  "success",
 		Data: map[string]interface{}{
-			// "status_code": resp.StatusCode,
 			"response": string(respData),
-			// "headers":     resp.Header,
-			// "time_ms":     duration.Milliseconds(), // add as ms
-			// "time_string": duration.String(),       // "123ms"
 		},
 		Status_Code: resp.StatusCode,
 		Headers:     resp.Header,
 		TimeString:  duration.String(),
-		TimeMs:      duration.Microseconds(),
+		TimeMs:      duration.Milliseconds(),
 	}
 
-	c.WriteJSON(event)
+	if err := c.WriteJSON(event); err != nil {
+		log.Printf("failed to write response to websocket: %v", err)
+	}
+}
 
-	// fmt.Println("Status:", resp.StatusCode)
-	// fmt.Println("Time taken:", duration)
-	// fmt.Println("Response:", string(respData))
+func sendError(c *websocket.Conn, clientID string, err error, start time.Time) {
+	duration := time.Since(start)
+
+	event := ResponseMessage{
+		Event:    "response",
+		ClientID: clientID,
+		Message:  "error",
+		Data: map[string]interface{}{
+			"error": err.Error(),
+		},
+		Status_Code: http.StatusBadGateway,
+		TimeString:  duration.String(),
+		TimeMs:      duration.Milliseconds(),
+	}
+
+	if writeErr := c.WriteJSON(event); writeErr != nil {
+		log.Printf("failed to write error response to websocket: %v (original: %v)", writeErr, err)
+	}
 }

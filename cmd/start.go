@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
+	"path/filepath"
 
 	"github.com/gorilla/websocket"
 	"github.com/spf13/cobra"
@@ -31,26 +33,39 @@ type Message struct {
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Starts Polling local port to the internet",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Connects to the Nano-tunnel server using a JSON config file",
+	Long: `Start a WebSocket connection to the Nano-tunnel server so the hosted
+UI can forward HTTP requests to your local machine.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Example config file (your_config_file.json):
+  {
+    "remote_url": "nano-tunnel.onrender.com"
+  }
+
+Run the tunnel:
+  nano-tunnel start ./your_config_file.json
+
+Keep this command running, copy the printed Client ID into the hosted UI,
+then enter the local port and API path you want to forward.`,
+	Example: "nano-tunnel start ./your_config_file.json",
 	Run: func(cmd *cobra.Command, args []string) {
-		// fmt.Println("start called")
 		if len(args) > 1 || len(args) == 0 {
-			fmt.Println("ERROR: Enter valid path to the config file")
+			_ = cmd.Help()
 			return
 		}
 
-		listener, err := start.NewListener(args[0])
-		if err != nil {
-			log.Fatal("Error while reading:", err)
+		configPath := args[0]
+		if _, err := os.Stat(configPath); err != nil {
+			log.Fatalf("unable to read config file %s: %v", configPath, err)
 		}
+
+		listener, err := start.NewListener(configPath)
+		if err != nil {
+			log.Fatal("Error while reading config:", err)
+		}
+
 		u := url.URL{Scheme: "wss", Host: listener.RemoteUrl, Path: "/ws"}
-		fmt.Println("Connecting to", u.String())
+		fmt.Printf("Connecting to %s (config: %s)\n", u.String(), filepath.Clean(configPath))
 
 		c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 
@@ -79,9 +94,9 @@ to quickly create a Cobra application.`,
 				log.Println("Broadcast message:", m.Message)
 
 			case "forward":
-				fmt.Println(m)
 				url := fmt.Sprintf("http://localhost:%s%s", m.Data.LocalPort, m.Data.Path)
-				forward.FetchResource(c, url, m.Data.Method, m.Data.Headers, m.Data.Body)
+				log.Printf("Forwarding request for client %s to %s", m.ClientID, url)
+				forward.FetchResource(c, m.ClientID, url, m.Data.Method, m.Data.Headers, m.Data.Body)
 
 			default:
 				log.Println("Unknown event:", m.Event)
