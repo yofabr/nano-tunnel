@@ -59,7 +59,15 @@ const wsSender = (client, data) => {
     })
   );
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    let timer = setTimeout(() => {
+      reject({
+        status: 504,
+        headers: {},
+        body: "Gateway Timeout"
+      });
+      clearTimeout(timer);
+    }, 20000); // 30 seconds timeout
     client.on("message", (msg) => {
       const response = JSON.parse(msg.toString());
       if (response.event === "response") {
@@ -71,25 +79,30 @@ const wsSender = (client, data) => {
 
 app.post("/send", async (req, res) => {
   const { clientID, port, method, headers, body, path } = req.body;
-
-  if (!clientID) {
-    return res.status(400).json({ error: "clientID is required" });
+  try {
+    if (!clientID) {
+      return res.status(400).json({ error: "clientID is required" });
+    }
+  
+    const client = clients[clientID]
+  
+    if (!client || client.readyState !== 1) {
+      return res.status(404).json({ error: "Client not connected" });
+    }
+    const response = await wsSender(client, {
+      local_port: port,
+      method,
+      headers,
+      body,
+      path
+    });
+    // Send a message to this specific client
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({
+      error
+    });
   }
-
-  const client = clients[clientID]
-
-  if (!client || client.readyState !== 1) {
-    return res.status(404).json({ error: "Client not connected" });
-  }
-  const response = await wsSender(client, {
-    local_port: port,
-    method,
-    headers,
-    body,
-    path
-  });
-  // Send a message to this specific client
-  res.json(response);
 });
 
 
@@ -112,5 +125,5 @@ wss.on("connection", (ws) => {
 
 const PORT = 8080;
 server.listen(PORT, () => {
-  // console.log(`Server running on port :${PORT}`);
+  console.log(`Server running on port :${PORT}`);
 });
