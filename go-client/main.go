@@ -20,15 +20,44 @@ var upgrader = websocket.Upgrader{
 }
 
 type WSMessage struct {
-	Event   string      `json:"event"`
-	Message string      `json:"message,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
+	Event    string      `json:"event"`
+	Message  string      `json:"message,omitempty"`
+	Data     interface{} `json:"data,omitempty"`
+	ClientID string      `json:"clientID,omitempty"`
+}
+
+type Client struct {
+	ID       string
+	Conn     *websocket.Conn
+	Incoming chan map[string]interface{}
+	WriteMu  sync.Mutex
 }
 
 var (
-	clients   = make(map[string]*websocket.Conn)
+	clients   = make(map[string]*Client)
 	clientsMu sync.Mutex
 )
+
+func (c *Client) readLoop() {
+	defer func() {
+		close(c.Incoming)
+		c.Conn.Close()
+
+		clientsMu.Lock()
+		delete(clients, c.ID)
+		clientsMu.Unlock()
+
+		log.Println("Client disconnected:", c.ID)
+	}()
+
+	for {
+		var msg map[string]interface{}
+		if err := c.Conn.ReadJSON(&msg); err != nil {
+			return
+		}
+		c.Incoming <- msg
+	}
+}
 
 func serveStatic() {
 	fs := http.FileServer(http.Dir("./public"))
@@ -72,43 +101,37 @@ func helloPost(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-func wsSender(ctx context.Context, conn *websocket.Conn, data interface{}) (map[string]interface{}, error) {
-	request := WSMessage{
+func wsSender(ctx context.Context, c *Client, data interface{}) (map[string]interface{}, error) {
+	c.WriteMu.Lock()
+	err := c.Conn.WriteJSON(WSMessage{
 		Event: "forward",
 		Data:  data,
-	}
+	})
+	c.WriteMu.Unlock()
 
-	if err := conn.WriteJSON(request); err != nil {
+	if err != nil {
 		return nil, err
 	}
 
-	responseChan := make(chan map[string]interface{}, 1)
-
-	go func() {
-		for {
-			var msg map[string]interface{}
-			if err := conn.ReadJSON(&msg); err != nil {
-				return
+	for {
+		select {
+		case msg, ok := <-c.Incoming:
+			if !ok {
+				return nil, fmt.Errorf("client disconnected")
 			}
 			if msg["event"] == "response" {
-				responseChan <- msg
-				return
+				return msg, nil
 			}
+		case <-ctx.Done():
+			return nil, fmt.Errorf("gateway timeout")
 		}
-	}()
-
-	select {
-	case resp := <-responseChan:
-		return resp, nil
-	case <-ctx.Done():
-		return nil, fmt.Errorf("gateway timeout")
 	}
 }
 
 func sendHandler(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		ClientID string      `json:"clientID"`
-		Port     int         `json:"port"`
+		Port     string      `json:"port"`
 		Method   string      `json:"method"`
 		Headers  interface{} `json:"headers"`
 		Body     interface{} `json:"body"`
@@ -163,28 +186,31 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	clientID := uuid.NewString()
 
+	client := &Client{
+		ID:       clientID,
+		Conn:     conn,
+		Incoming: make(chan map[string]interface{}, 8),
+	}
+
 	clientsMu.Lock()
-	clients[clientID] = conn
+	clients[clientID] = client
 	clientsMu.Unlock()
 
-	// Welcome message
-	conn.WriteJSON(WSMessage{
-		Event:   "welcome",
-		Message: "",
-		Data: map[string]string{
-			"clientID": clientID,
-		},
+	go client.readLoop()
+
+	client.WriteMu.Lock()
+	err = client.Conn.WriteJSON(WSMessage{
+		Event:    "welcome",
+		ClientID: clientID,
 	})
+	client.WriteMu.Unlock()
+
+	if err != nil {
+		log.Println("Write error:", err)
+		return
+	}
 
 	log.Println("Client connected:", clientID)
-
-	defer func() {
-		clientsMu.Lock()
-		delete(clients, clientID)
-		clientsMu.Unlock()
-		conn.Close()
-		log.Println("Client disconnected:", clientID)
-	}()
 }
 
 func WebSocketHandler(w http.ResponseWriter, r *http.Request) {

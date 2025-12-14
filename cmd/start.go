@@ -64,7 +64,7 @@ then enter the local port and API path you want to forward.`,
 			log.Fatal("Error while reading config:", err)
 		}
 
-		u := url.URL{Scheme: "wss", Host: listener.RemoteUrl, Path: "/ws"}
+		u := url.URL{Scheme: "ws", Host: listener.RemoteUrl, Path: "/ws"}
 		fmt.Printf("Connecting to %s (config: %s)\n", u.String(), filepath.Clean(configPath))
 
 		c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
