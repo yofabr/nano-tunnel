@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
-	"path/filepath"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/yofabr/nano-tunnel/internal/start"
 )
 
 var configCmd = &cobra.Command{
@@ -17,22 +18,34 @@ the result. This is a dry-run helper for verifying configuration before
 starting the tunnel.`,
 	Example: "nano-tunnel config ./your_config_file.json",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			_ = cmd.Help()
+		scanner := bufio.NewScanner(os.Stdin)
+		fmt.Println("Enter config file name:")
+		scanner.Scan()
+		filename := scanner.Text()
+		if filename == "" {
+			filename = "./config.json"
+		}
+		if _, err := os.Stat(filename); err == nil {
+			fmt.Println("Config file already exists")
 			return
 		}
 
-		cfgPath := args[0]
-		cfg, err := start.NewListener(cfgPath)
-		if err != nil {
-			fmt.Println("error reading config:", err)
-			return
+		fmt.Println("Enter Remote URL (default: nano-tunnel.onrender.com)")
+		scanner.Scan()
+		url := scanner.Text()
+		if url == "" {
+			url = "nano-tunnel.onrender.com"
 		}
 
 		payload := map[string]any{
-			"path":       filepath.Clean(cfgPath),
-			"remote_url": cfg.RemoteUrl,
-			"local_port": cfg.LocalPort,
+			"remote_url": url,
+		}
+
+		fmt.Println("Enter Config Path (default: ./)")
+		scanner.Scan()
+		path := scanner.Text()
+		if path == "" {
+			path = "./"
 		}
 
 		out, err := json.MarshalIndent(payload, "", "  ")
@@ -41,7 +54,10 @@ starting the tunnel.`,
 			return
 		}
 
-		fmt.Println(string(out))
+		filename = strings.TrimSuffix(filename, ".json")
+		filename = filename + ".json"
+		os.WriteFile(filename, out, 0644)
+		fmt.Println("Config file created:", filename)
 	},
 }
 

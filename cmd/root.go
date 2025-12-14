@@ -18,10 +18,10 @@ requests to your local machine from anywhere.
 
 Typical flow:
   1) Create a config file with your remote server:
-       { "remote_url": "nano-tunnel.onrender.com" }
+       Eg: { "remote_url": "nano-tunnel.onrender.com" }
   2) Start the tunnel with your config:
        nano-tunnel start ./your_config_file.json
-  3) Copy the printed Client ID into the hosted Nano-tunnel UI and forward
+  3) Copy the Client ID into the hosted Nano-tunnel UI and forward
      requests to the local port you specify.`,
 }
 
@@ -34,5 +34,4 @@ func Execute() {
 	}
 }
 
-func init() {
-}
+func init() {}
