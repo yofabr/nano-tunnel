@@ -47,6 +47,14 @@ sudo rm -f /usr/local/bin/nano-tunnel
 }
 ```
 
+OR
+
+Generate Using:
+
+```bash
+nano-tunnel config
+```
+
 2. Start the CLI and connect your device:
 
 ```bash
