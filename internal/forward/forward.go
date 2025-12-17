@@ -24,6 +24,8 @@ type ResponseMessage struct {
 	TimeMs      int64                  `json:"time_ms,omitempty"`
 }
 
+var validMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"}
+
 func FetchResource(c *websocket.Conn, clientID, url, method string, headers map[string]string, body map[string]interface{}) {
 	start := time.Now()
 
@@ -31,6 +33,19 @@ func FetchResource(c *websocket.Conn, clientID, url, method string, headers map[
 		method = http.MethodGet
 	}
 	method = strings.ToUpper(method)
+
+	isValidMethod := false
+	for _, m := range validMethods {
+		if method == m {
+			isValidMethod = true
+			break
+		}
+	}
+
+	if !isValidMethod {
+		sendError(c, clientID, fmt.Errorf("invalid HTTP method: %s", method), start)
+		return
+	}
 
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
