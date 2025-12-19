@@ -72,6 +72,8 @@ then enter the local port and API path you want to forward.`,
 		if err != nil {
 			log.Fatal("Dial error:", err)
 		}
+
+		defer logger.DisconnectLogger()
 		defer c.Close()
 
 		for {
