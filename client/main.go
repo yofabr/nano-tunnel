@@ -15,7 +15,7 @@ import (
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		return true // allow all origins (lock down in prod)
+		return true
 	},
 }
 
@@ -62,43 +62,6 @@ func (c *Client) readLoop() {
 func serveStatic() {
 	fs := http.FileServer(http.Dir("./public"))
 	http.Handle("/", fs)
-}
-
-func helloGet(w http.ResponseWriter, r *http.Request) {
-	log.Println("Headers:", r.Header)
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Hello from Go!",
-	})
-}
-
-func helloPost(w http.ResponseWriter, r *http.Request) {
-	var body map[string]interface{}
-	json.NewDecoder(r.Body).Decode(&body)
-
-	log.Println("Headers:", r.Header)
-	log.Println("Body:", body)
-
-	resp := map[string]interface{}{
-		"message": "Hello from Go!",
-		"data": map[string]interface{}{
-			"firstName": "Jane",
-			"lastName":  "Doe",
-			"age":       30,
-			"email":     "jane.doe@example.com",
-			"isStudent": false,
-			"hobbies":   []string{"reading", "hiking", "cooking"},
-			"address": map[string]string{
-				"street":  "123 Main St",
-				"city":    "Anytown",
-				"zipCode": "12345",
-			},
-		},
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
 }
 
 func wsSender(ctx context.Context, c *Client, data interface{}) (map[string]interface{}, error) {
@@ -213,40 +176,8 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Client connected:", clientID)
 }
 
-func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
-	ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer ws.Close()
-	for {
-		_, message, err := ws.ReadMessage()
-		if err != nil {
-			break
-		}
-
-		// switch message {
-		fmt.Println(string(message))
-		err = ws.WriteMessage(websocket.TextMessage, []byte("Hello, World!"))
-		if err != nil {
-			break
-		}
-	}
-}
-
 func main() {
 	serveStatic()
-
-	http.HandleFunc("/api/hello", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet {
-			helloGet(w, r)
-		} else if r.Method == http.MethodPost {
-			helloPost(w, r)
-		} else {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-		}
-	})
 
 	http.HandleFunc("/send", sendHandler)
 	http.HandleFunc("/ws", wsHandler)
