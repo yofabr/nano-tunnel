@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -10,57 +9,61 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	configPath      string
+	configURL       string
+	configOverwrite bool
+)
+
 var configCmd = &cobra.Command{
-	Use:   "config [path]",
-	Short: "Preview and validate a nano-tunnel config file",
-	Long: `Read a nano-tunnel JSON config, normalize the remote host, and print
-the result. This is a dry-run helper for verifying configuration before
-starting the tunnel.`,
-	Example: "nano-tunnel config ./your_config_file.json",
+	Use:   "config",
+	Short: "Generate a nano-tunnel config file",
+	Long: `Create a nano-tunnel JSON config file with the specified remote URL.
+
+Example:
+  nano-tunnel config -u nano-tunnel.onrender.com -o ./config.json`,
+	Example: "nano-tunnel config -u nano-tunnel.onrender.com -o ./config.json",
 	Run: func(cmd *cobra.Command, args []string) {
-		scanner := bufio.NewScanner(os.Stdin)
-		fmt.Println("Enter config file name:")
-		scanner.Scan()
-		filename := scanner.Text()
+		filename := configPath
 		if filename == "" {
 			filename = "./config.json"
 		}
-		if _, err := os.Stat(filename); err == nil {
-			fmt.Println("Config file already exists")
-			return
+
+		filename = strings.TrimSuffix(filename, ".json") + ".json"
+
+		if !configOverwrite {
+			if _, err := os.Stat(filename); err == nil {
+				fmt.Printf("Config file %s already exists. Use -f to overwrite.\n", filename)
+				return
+			}
 		}
 
-		fmt.Println("Enter Remote URL (default: nano-tunnel.onrender.com)")
-		scanner.Scan()
-		url := scanner.Text()
-		if url == "" {
-			url = "nano-tunnel.onrender.com"
+		if configURL == "" {
+			configURL = "nano-tunnel.onrender.com"
 		}
 
 		payload := map[string]any{
-			"remote_url": url,
-		}
-
-		fmt.Println("Enter Config Path (default: ./)")
-		scanner.Scan()
-		path := scanner.Text()
-		if path == "" {
-			path = "./"
+			"remote_url": configURL,
 		}
 
 		out, err := json.MarshalIndent(payload, "", "  ")
 		if err != nil {
-			fmt.Println("error rendering config preview:", err)
+			fmt.Println("error rendering config:", err)
 			return
 		}
 
-		filename = strings.TrimSuffix(filename, ".json")
-		filename = filename + ".json"
-		os.WriteFile(filename, out, 0644)
+		if err := os.WriteFile(filename, out, 0644); err != nil {
+			fmt.Println("error writing config file:", err)
+			return
+		}
+
 		fmt.Println("Config file created:", filename)
 	},
 }
 
 func init() {
+	configCmd.Flags().StringVarP(&configPath, "output", "o", "", "Output config file path (default: ./config.json)")
+	configCmd.Flags().StringVarP(&configURL, "url", "u", "", "Remote server URL (default: nano-tunnel.onrender.com)")
+	configCmd.Flags().BoolVarP(&configOverwrite, "force", "f", false, "Overwrite existing config file")
 	rootCmd.AddCommand(configCmd)
 }
