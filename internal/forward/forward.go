@@ -11,22 +11,12 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/yofabr/nano-tunnel/internal/types"
 )
-
-type ResponseMessage struct {
-	Event       string                 `json:"event"`
-	ClientID    string                 `json:"clientID,omitempty"`
-	Message     string                 `json:"message,omitempty"`
-	Data        map[string]interface{} `json:"data,omitempty"`
-	Status_Code int                    `json:"status_code,omitempty"`
-	Headers     http.Header            `json:"headers,omitempty"`
-	TimeString  string                 `json:"time_string,omitempty"`
-	TimeMs      int64                  `json:"time_ms,omitempty"`
-}
 
 var validMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"}
 
-func FetchResource(c *websocket.Conn, clientID, url, method string, headers map[string]string, body map[string]interface{}) {
+func FetchResource(c *websocket.Conn, clientID, targetURL, method string, headers map[string]string, body map[string]interface{}) {
 	start := time.Now()
 
 	if method == "" {
@@ -53,7 +43,7 @@ func FetchResource(c *websocket.Conn, clientID, url, method string, headers map[
 		return
 	}
 
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(bodyBytes))
+	req, err := http.NewRequest(method, targetURL, bytes.NewBuffer(bodyBytes))
 	if err != nil {
 		sendError(c, clientID, fmt.Errorf("create request: %w", err), start)
 		return
@@ -87,17 +77,15 @@ func FetchResource(c *websocket.Conn, clientID, url, method string, headers map[
 		return
 	}
 
-	event := ResponseMessage{
-		Event:    "response",
-		ClientID: clientID,
-		Message:  "success",
-		Data: map[string]interface{}{
-			"response": string(respData),
-		},
-		Status_Code: resp.StatusCode,
-		Headers:     resp.Header,
-		TimeString:  duration.String(),
-		TimeMs:      duration.Milliseconds(),
+	event := types.ResponseMessage{
+		Event:      "response",
+		ClientID:   clientID,
+		Message:    "success",
+		Data:       map[string]interface{}{"response": string(respData)},
+		StatusCode: resp.StatusCode,
+		Headers:    resp.Header,
+		TimeString: duration.String(),
+		TimeMs:     duration.Milliseconds(),
 	}
 
 	if err := c.WriteJSON(event); err != nil {
@@ -108,16 +96,14 @@ func FetchResource(c *websocket.Conn, clientID, url, method string, headers map[
 func sendError(c *websocket.Conn, clientID string, err error, start time.Time) {
 	duration := time.Since(start)
 
-	event := ResponseMessage{
-		Event:    "response",
-		ClientID: clientID,
-		Message:  "error",
-		Data: map[string]interface{}{
-			"error": err.Error(),
-		},
-		Status_Code: http.StatusBadGateway,
-		TimeString:  duration.String(),
-		TimeMs:      duration.Milliseconds(),
+	event := types.ResponseMessage{
+		Event:      "response",
+		ClientID:   clientID,
+		Message:    "error",
+		Data:       map[string]interface{}{"error": err.Error()},
+		StatusCode: http.StatusBadGateway,
+		TimeString: duration.String(),
+		TimeMs:     duration.Milliseconds(),
 	}
 
 	if writeErr := c.WriteJSON(event); writeErr != nil {

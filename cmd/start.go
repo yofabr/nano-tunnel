@@ -13,24 +13,9 @@ import (
 	"github.com/yofabr/nano-tunnel/internal/forward"
 	"github.com/yofabr/nano-tunnel/internal/logger"
 	"github.com/yofabr/nano-tunnel/internal/start"
+	"github.com/yofabr/nano-tunnel/internal/types"
 )
 
-type WsData struct {
-	LocalPort string                 `json:"local_port,omitempty"`
-	Path      string                 `json:"path,omitempty"`
-	Method    string                 `json:"method,omitempty"`
-	Headers   map[string]string      `json:"headers,omitempty"`
-	Body      map[string]interface{} `json:"body,omitempty"`
-}
-
-type Message struct {
-	Event    string `json:"event"`
-	ClientID string `json:"clientID,omitempty"`
-	Message  string `json:"message,omitempty"`
-	Data     WsData `json:"data,omitempty"`
-}
-
-// startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Connects to the Nano-tunnel server using a JSON config file",
@@ -83,7 +68,7 @@ then enter the local port and API path you want to forward.`,
 				break
 			}
 
-			var m Message
+			var m types.Message
 			if err := json.Unmarshal(msg, &m); err != nil {
 				log.Println("JSON unmarshal error:", err)
 				continue
@@ -96,28 +81,17 @@ then enter the local port and API path you want to forward.`,
 				log.Println("Broadcast message:", m.Message)
 
 			case "forward":
-				url := fmt.Sprintf("http://localhost:%s%s", m.Data.LocalPort, m.Data.Path)
-				log.Printf("Forwarding request for client %s to %s", m.ClientID, url)
-				forward.FetchResource(c, m.ClientID, url, m.Data.Method, m.Data.Headers, m.Data.Body)
+				forwardURL := fmt.Sprintf("http://localhost:%s%s", m.Data.LocalPort, m.Data.Path)
+				log.Printf("Forwarding request for client %s to %s", m.ClientID, forwardURL)
+				forward.FetchResource(c, m.ClientID, forwardURL, m.Data.Method, m.Data.Headers, m.Data.Body)
 
 			default:
 				log.Println("Unknown event:", m.Event)
 			}
 		}
-		fmt.Println("Listener", *listener)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// startCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// startCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
