@@ -9,14 +9,8 @@ import (
 )
 
 type AppData struct {
-	RemoteUrl string   `json:"remote_url"`
-	Path      int      `json:"path"`
-	LocalPort string   `json:"local_port"`
-	Cors      []string `json:"cors"`
-}
-
-func (a *AppData) start_polling() {
-	// Initialize a web socket here to forward incoming requests...
+	RemoteUrl string `json:"remote_url"`
+	LocalPort string `json:"local_port"`
 }
 
 func (a *AppData) Validate() error {
